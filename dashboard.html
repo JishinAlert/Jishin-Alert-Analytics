@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jishin Alert - Admin Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body class="dashboard-page">
+
+    <button class="mobile-menu-btn" id="mobileMenuBtn">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+    <div class="mobile-overlay" id="mobileOverlay"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h1>🎮 Jishin Alert</h1>
+            <p class="admin-badge">Admin Dashboard</p>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="#overview" class="nav-item active" data-page="overview">
+                <span class="icon">📊</span>
+                <span>Overview</span>
+            </a>
+            <a href="#users" class="nav-item" data-page="users">
+                <span class="icon">👥</span>
+                <span>Users</span>
+            </a>
+            <a href="#gameplay" class="nav-item" data-page="gameplay">
+                <span class="icon">🎮</span>
+                <span>Gameplay History</span>
+            </a>
+            <a href="#assessment" class="nav-item" data-page="assessment">
+                <span class="icon">📝</span>
+                <span>Assessment Analytics</span>
+            </a>
+            <a href="#feedback" class="nav-item" data-page="feedback">
+                <span class="icon">💬</span>
+                <span>Feedback</span>
+            </a>
+            <a href="#crashes" class="nav-item" data-page="crashes">
+                <span class="icon">🐛</span>
+                <span>Crash Reports</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="admin-info">
+                <p id="adminName">Loading...</p>
+                <p id="adminEmail" class="text-muted">admin@email.com</p>
+            </div>
+            <button class="btn-logout" id="logoutBtn">
+                <span>🚪 Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+       <!-- Header -->
+<header class="dashboard-header">
+    <div class="header-left">
+        <h1 id="pageTitle">Overview Dashboard</h1>
+        <p id="pageSubtitle">Real-time analytics and insightss</p>
+    </div>
+    <div class="header-right">
+        <!-- THEME TOGGLE -->
+        <div class="theme-toggle" id="themeToggle">
+            <div class="theme-toggle-slider"></div>
+        </div>
+        
+        <button class="btn-refresh" id="refreshBtn">
+            <span>🔄 Refresh Data</span>
+        </button>
+        <div class="last-updated">
+            Last updated: <span id="lastUpdated">Never</span>
+        </div>
+    </div>
+</header>
+        <!-- Overview Page -->
+        <section id="overviewPage" class="page-content active">
+            <!-- (Keep your existing overview content) -->
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">👥</div>
+                    <div class="stat-info">
+                        <h3>Total Users</h3>
+                        <p class="stat-value" id="totalUsers">0</p>
+                        <span class="stat-change positive">+0 this week</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">🎮</div>
+                    <div class="stat-info">
+                        <h3>Total Games Played</h3>
+                        <p class="stat-value" id="totalGames">0</p>
+                        <span class="stat-change">All difficulties</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">📝</div>
+                    <div class="stat-info">
+                        <h3>Quizzes Completed</h3>
+                        <p class="stat-value" id="totalQuizzes">0</p>
+                        <span class="stat-change">All levels</span>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">⭐</div>
+                    <div class="stat-info">
+                        <h3>Average Score</h3>
+                        <p class="stat-value" id="avgScore">0%</p>
+                        <span class="stat-change neutral">Across all modes</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row 1 -->
+            <div class="charts-row">
+                <div class="chart-card">
+                    <h3>Games by Difficulty</h3>
+                    <canvas id="difficultyChart"></canvas>
+                </div>
+
+                <div class="chart-card">
+                    <h3>Victory vs Failure Rate</h3>
+                    <canvas id="victoryChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Charts Row 2 -->
+            <div class="charts-row">
+                <div class="chart-card">
+                    <h3>Average Scores by Difficulty</h3>
+                    <canvas id="scoreChart"></canvas>
+                </div>
+
+                <div class="chart-card">
+                    <h3>User Activity (Last 7 Days)</h3>
+                    <canvas id="activityChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="recent-activity">
+                <h3>Recent Activity</h3>
+                <div id="recentActivityList" class="activity-list">
+                    <p class="loading">Loading recent activity...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Users Page -->
+        <section id="usersPage" class="page-content">
+            <div class="page-controls">
+                <input type="text" id="userSearch" placeholder="🔍 Search users..." class="search-input">
+                <button class="btn-secondary" id="exportUsersBtn">📥 Export Users</button>
+            </div>
+
+            <div class="users-grid" id="usersGrid">
+                <p class="loading">Loading users...</p>
+            </div>
+
+            <!-- User Detail Modal -->
+            <div id="userModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2 id="modalUserName">User Details</h2>
+                        <button class="modal-close" id="closeUserModal">&times;</button>
+                    </div>
+                    <div class="modal-body" id="userModalBody">
+                        <!-- User details will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+      <!-- Gameplay History Page -->
+<section id="gameplayPage" class="page-content">
+    <div class="page-controls">
+        <select id="difficultyFilter" class="filter-select">
+            <option value="all">All Difficulties</option>
+            <option value="Easy">Easy</option>
+            <option value="Normal">Normal</option>
+            <option value="Hard">Hard</option>
+        </select>
+        <select id="resultFilter" class="filter-select">
+            <option value="all">All Results</option>
+            <option value="victory">Victory Only</option>
+            <option value="failed">Failed Only</option>
+        </select>
+        <button class="btn-secondary" id="exportGameplayBtn">📥 Export Data</button>
+    </div>
+
+    <!-- ⭐ UPDATED: Chart syncs with dropdown filter -->
+    <div class="chart-card" style="margin-bottom: 30px;">
+        <h3>🏆 Grade Distribution by Difficulty</h3>
+        <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 20px;">
+            Performance breakdown - Use the difficulty filter above to change modes
+        </p>
+        <div id="gameplayGradeChartContainer" style="height: 350px;">
+            <canvas id="gameplayGradeChart"></canvas>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table class="data-table" id="gameplayTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>User</th>
+                    <th>Difficulty</th>
+                    <th>Result</th>
+                    <th>Score</th>
+                    <th>Grade</th>
+                    <th>Time</th>
+                    <th>Objectives</th>
+                </tr>
+            </thead>
+            <tbody id="gameplayTableBody">
+                <tr>
+                    <td colspan="8" class="loading">Loading gameplay data...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+     <!-- Assessment Analytics Page -->
+<section id="assessmentPage" class="page-content">
+    <!-- Quiz Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">📝</div>
+            <div class="stat-info">
+                <h3>Total Quiz Attempts</h3>
+                <p class="stat-value" id="totalQuizAttempts">0</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-info">
+                <h3>Average Correct Answers</h3>
+                <p class="stat-value" id="avgCorrect">0/5</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">❌</div>
+            <div class="stat-info">
+                <h3>Average Wrong Answers</h3>
+                <p class="stat-value" id="avgWrong">0/5</p>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-info">
+                <h3>Success Rate</h3>
+                <p class="stat-value" id="successRate">0%</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Difficulty Tabs -->
+    <div class="difficulty-tabs">
+        <button class="tab-btn active" data-difficulty="Easy">Easy Mode</button>
+        <button class="tab-btn" data-difficulty="Normal">Normal Mode</button>
+        <button class="tab-btn" data-difficulty="Hard">Hard Mode</button>
+    </div>
+
+    <!-- Grade Distribution Chart -->
+    <div class="chart-card" style="margin-bottom: 30px;">
+        <h3>📊 Grade Distribution</h3>
+        <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 20px;">Percentage of quiz scores per grade level</p>
+        <div id="assessmentGradeChartContainer" style="height: 300px;">
+            <canvas id="assessmentGradeChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Question Analysis -->
+    <div class="question-analysis">
+        <h3>Question Performance Analysis</h3>
+        <p class="analysis-subtitle">Which questions do players struggle with?</p>
+
+        <div id="questionStatsContainer">
+            <!-- Question stats will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Quiz History Table -->
+    <div class="table-container">
+        <h3>Recent Quiz Attempts</h3>
+        <table class="data-table" id="quizTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>User</th>
+                    <th>Difficulty</th>
+                    <th>Correct</th>
+                    <th>Wrong</th>
+                    <th>Score</th>
+                    <th>Grade</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="quizTableBody">
+                <tr>
+                    <td colspan="8" class="loading">Loading quiz data...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Quiz Detail Modal -->
+    <div id="quizModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Quiz Details</h2>
+                <button class="modal-close" id="closeQuizModal">&times;</button>
+            </div>
+            <div class="modal-body" id="quizModalBody">
+                <!-- Quiz details will be loaded here -->
+            </div>
+        </div>
+    </div>
+</section>
+
+        <!-- FEEDBACK PAGE -->
+        <section id="feedbackPage" class="page-content">
+            <!-- Feedback Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">💬</div>
+                    <div class="stat-info">
+                        <h3>Total Feedback</h3>
+                        <p class="stat-value" id="totalFeedback">0</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">📅</div>
+                    <div class="stat-info">
+                        <h3>This Week</h3>
+                        <p class="stat-value" id="feedbackThisWeek">0</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">👤</div>
+                    <div class="stat-info">
+                        <h3>Unique Users</h3>
+                        <p class="stat-value" id="uniqueFeedbackUsers">0</p>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon">🕐</div>
+                    <div class="stat-info">
+                        <h3>Latest Feedback</h3>
+                        <p class="stat-value" id="latestFeedbackTime" style="font-size: 0.9rem;">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-controls">
+                <select id="timeSortFilter" class="filter-select">
+                    <option value="desc">Newest First</option>
+                    <option value="asc">Oldest First</option>
+                </select>
+                <button class="btn-secondary" id="exportFeedbackBtn">📥 Export Feedback</button>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table" id="feedbackTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>User</th>
+                            <th>Feedback</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="feedbackTableBody">
+                        <tr>
+                            <td colspan="4" class="loading">Loading feedback...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Feedback Detail Modal -->
+            <div id="feedbackModal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>Feedback Details</h2>
+                        <button class="modal-close" id="closeFeedbackModal">&times;</button>
+                    </div>
+                    <div class="modal-body" id="feedbackModalBody">
+                        <!-- Feedback details will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Crash Reports Page -->
+        <section id="crashesPage" class="page-content">
+            <div class="page-controls">
+                <select id="crashFilter" class="filter-select">
+                    <option value="all">All Crashes</option>
+                    <option value="Error">Errors Only</option>
+                    <option value="Exception">Exceptions Only</option>
+                </select>
+                <button class="btn-secondary" id="exportCrashesBtn">📥 Export Crashes</button>
+            </div>
+
+            <div class="table-container">
+                <table class="data-table" id="crashTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>User</th>
+                            <th>Type</th>
+                            <th>Scene</th>
+                            <th>Device</th>
+                            <th>Message</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="crashTableBody">
+                        <tr>
+                            <td colspan="7" class="loading">Loading crash reports...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Crash Detail Modal -->
+            <div id="crashModal" class="modal">
+                <div class="modal-content modal-large">
+                    <div class="modal-header">
+                        <h2>Crash Report Details</h2>
+                        <button class="modal-close" id="closeCrashModal">&times;</button>
+                    </div>
+                    <div class="modal-body" id="crashModalBody">
+                        <!-- Crash details will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+      <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Firebase config -->
+    <script src="js/firebase-config.js"></script>
+    <script src="js/dashboard-auth.js"></script>  
+    
+    <!-- Dashboard scripts -->
+    <script src="js/charts.js"></script>
+    <script src="js/users.js"></script>
+    <script src="js/gameplay.js"></script>
+    <script src="js/assessment.js"></script>
+    <script src="js/feedback.js"></script>
+    <script src="js/crashes.js"></script> 
+    <script src="js/app.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/mobile-menu.js"></script>
+</body>
+</html>

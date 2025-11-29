@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Jishin Alert Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="login-page">
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>Jishin Alert</h1>
+                <h2>Admin Dashboard</h2>
+                <p>Earthquake Game Simplified Analytics</p>
+            </div>
+
+            <form id="loginForm" class="login-form">
+                <!-- ✅ CHANGED: Email → UserID -->
+                <div class="form-group">
+                    <label for="userId">Admin User ID</label>
+                    <input type="text" id="userId" placeholder="Enter Admin User ID" required autocomplete="username">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="Enter your password" required autocomplete="current-password">
+                </div>
+
+                <button type="submit" class="btn-primary" id="loginBtn">
+                    <span>Login to Dashboard</span>
+                </button>
+
+                <div id="errorMessage" class="error-message"></div>
+            </form>
+
+            <div class="login-footer">
+                <p>🔒 Authorized personnel only</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <script>
+        console.log("Firebase SDK loaded:", typeof firebase !== 'undefined');
+    </script>
+    
+    <!-- Firebase config -->
+    <script src="js/firebase-config.js"></script>
+    
+    <!-- Auth script -->
+    <script src="js/auth.js"></script>
+
+    <script src="js/theme.js"></script>
+</body>
+</html>
