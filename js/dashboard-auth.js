@@ -72,7 +72,7 @@ waitForFirebase().then(() => {
                 await window.auth.signOut();
                 localStorage.clear();
                 console.log("✅ Logged out successfully");
-                window.location.href = 'admin.html';
+                window.location.href = 'index.html';
             } catch (error) {
                 console.error("❌ Logout error:", error);
             }
@@ -103,5 +103,6 @@ function redirectToLogin() {
     localStorage.clear();
     window.location.href = 'admin.html';
 }
+
 
 console.log("✅ Dashboard protection loaded");
