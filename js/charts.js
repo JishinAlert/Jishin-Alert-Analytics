@@ -1,6 +1,10 @@
-// CHARTS & VISUALIZATIONS
-
 console.log("📊 Charts.js loaded");
+
+// ✅ Register ChartDataLabels plugin for Chart.js v4
+if (typeof ChartDataLabels !== 'undefined') {
+    Chart.register(ChartDataLabels);
+    console.log("✅ ChartDataLabels plugin registered in charts.js!");
+}
 
 let chartInstances = {};
 
@@ -20,10 +24,6 @@ async function loadOverviewCharts() {
         console.error("❌ Error loading charts:", error);
     }
 }
-
-// ============================================
-// DIFFICULTY DISTRIBUTION CHART
-// ============================================
 
 async function createDifficultyChart() {
     const ctx = document.getElementById('difficultyChart');
@@ -69,6 +69,32 @@ async function createDifficultyChart() {
                     legend: {
                         position: 'bottom',
                         labels: { color: '#94a3b8' }
+                    },
+                    datalabels: {
+                        color: '#ffffff',
+                        backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                        borderRadius: 4,
+                        borderWidth: 1,
+                        borderColor: 'rgba(255, 255, 255, 0.8)',
+                        padding: {
+                            top: 4,
+                            bottom: 4,
+                            left: 8,
+                            right: 8
+                        },
+                        font: {
+                            weight: 'bold',
+                            size: 14,
+                            family: 'Arial'
+                        },
+                        formatter: function(value, context) {
+                            const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((value / total) * 100);
+                            return percentage > 0 ? percentage + '%' : '';
+                        },
+                        display: function(context) {
+                            return context.dataset.data[context.dataIndex] > 0;
+                        }
                     }
                 }
             }
@@ -78,10 +104,6 @@ async function createDifficultyChart() {
         console.error("Error creating difficulty chart:", error);
     }
 }
-
-// ============================================
-// VICTORY VS FAILURE CHART
-// ============================================
 
 async function createVictoryChart() {
     const ctx = document.getElementById('victoryChart');
@@ -128,6 +150,32 @@ async function createVictoryChart() {
                     legend: {
                         position: 'bottom',
                         labels: { color: '#94a3b8' }
+                    },
+                    datalabels: {
+                        color: '#ffffff',
+                        backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                        borderRadius: 4,
+                        borderWidth: 1,
+                        borderColor: 'rgba(255, 255, 255, 0.8)',
+                        padding: {
+                            top: 4,
+                            bottom: 4,
+                            left: 8,
+                            right: 8
+                        },
+                        font: {
+                            weight: 'bold',
+                            size: 14,
+                            family: 'Arial'
+                        },
+                        formatter: function(value, context) {
+                            const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                            const percentage = Math.round((value / total) * 100);
+                            return percentage > 0 ? percentage + '%' : '';
+                        },
+                        display: function(context) {
+                            return context.dataset.data[context.dataIndex] > 0;
+                        }
                     }
                 }
             }
@@ -137,10 +185,6 @@ async function createVictoryChart() {
         console.error("Error creating victory chart:", error);
     }
 }
-
-// ============================================
-// AVERAGE SCORES BY DIFFICULTY CHART
-// ============================================
 
 async function createScoreChart() {
     const ctx = document.getElementById('scoreChart');
@@ -192,7 +236,31 @@ async function createScoreChart() {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false }
+                    legend: { display: false },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'center',
+                        color: '#ffffff',
+                        backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                        borderRadius: 4,
+                        padding: {
+                            top: 4,
+                            bottom: 4,
+                            left: 8,
+                            right: 8
+                        },
+                        font: {
+                            weight: 'bold',
+                            size: 14,
+                            family: 'Arial'
+                        },
+                        formatter: function(value) {
+                            return value > 0 ? value : '';
+                        },
+                        display: function(context) {
+                            return context.dataset.data[context.dataIndex] > 0;
+                        }
+                    }
                 },
                 scales: {
                     y: {
@@ -212,10 +280,6 @@ async function createScoreChart() {
         console.error("Error creating score chart:", error);
     }
 }
-
-// ============================================
-// USER ACTIVITY CHART (Last 7 Days)
-// ============================================
 
 async function createActivityChart() {
     const ctx = document.getElementById('activityChart');
@@ -276,7 +340,8 @@ async function createActivityChart() {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { display: false }
+                    legend: { display: false },
+                    datalabels: { display: false }
                 },
                 scales: {
                     y: {
