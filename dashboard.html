@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="style.css">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Chart.js Datalabels Plugin - for showing labels on charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 </head>
 <body class="dashboard-page">
 
@@ -86,8 +88,6 @@
 </header>
         <!-- Overview Page -->
         <section id="overviewPage" class="page-content active">
-            <!-- (Keep your existing overview content) -->
-            <!-- Stats Cards -->
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-icon">👥</div>
@@ -160,31 +160,91 @@
                 </div>
             </div>
         </section>
-
-        <!-- Users Page -->
-        <section id="usersPage" class="page-content">
-            <div class="page-controls">
-                <input type="text" id="userSearch" placeholder="🔍 Search users..." class="search-input">
-                <button class="btn-secondary" id="exportUsersBtn">📥 Export Users</button>
+<!-- Users Page -->
+<section id="usersPage" class="page-content">
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-info">
+                <h3>Total Users</h3>
+                <p class="stat-value" id="totalUsersCount">0</p>
             </div>
-
-            <div class="users-grid" id="usersGrid">
-                <p class="loading">Loading users...</p>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🎮</div>
+            <div class="stat-info">
+                <h3>Active Players</h3>
+                <p class="stat-value" id="activePlayersCount">0</p>
+                <span class="stat-change">Played at least 1 game</span>
             </div>
-
-            <!-- User Detail Modal -->
-            <div id="userModal" class="modal">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h2 id="modalUserName">User Details</h2>
-                        <button class="modal-close" id="closeUserModal">&times;</button>
-                    </div>
-                    <div class="modal-body" id="userModalBody">
-                        <!-- User details will be loaded here -->
-                    </div>
-                </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📝</div>
+            <div class="stat-info">
+                <h3>Quiz Takers</h3>
+                <p class="stat-value" id="quizTakersCount">0</p>
+                <span class="stat-change">Completed at least 1 quiz</span>
             </div>
-        </section>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">💬</div>
+            <div class="stat-info">
+                <h3>Feedback Contributors</h3>
+                <p class="stat-value" id="feedbackContributorsCount">0</p>
+                <span class="stat-change">Submitted feedback</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="page-controls">
+        <input type="text" id="userSearch" placeholder="🔍 Search users by name..." class="search-input">
+        <select id="ageFilter" class="filter-select">
+            <option value="all">All Ages</option>
+            <option value="under18">Under 18</option>
+            <option value="18-19">18-19</option>
+            <option value="20-21">20-21</option>
+            <option value="22-25">22-25</option>
+            <option value="over25">Over 25</option>
+        </select>
+        <select id="activityFilter" class="filter-select">
+            <option value="all">All Activity</option>
+            <option value="active">Active (10+)</option>
+            <option value="moderate">Moderate (3-9)</option>
+            <option value="new">New (1-2)</option>
+            <option value="inactive">Inactive (0)</option>
+        </select>
+        <button class="btn-secondary" id="exportUsersBtn">📥 Export Users</button>
+    </div>
+
+    <div class="table-container">
+        <table class="data-table" id="usersTable">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Age</th>
+                    <th>Games</th>
+                    <th>Quizzes</th>
+                    <th>Feedback</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="usersTableBody">
+                <tr><td colspan="7" class="loading">Loading users...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="userModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalUserName">User Details</h2>
+                <button class="modal-close" id="closeUserModal">&times;</button>
+            </div>
+            <div class="modal-body" id="userModalBody"></div>
+        </div>
+    </div>
+</section>
 
       <!-- Gameplay History Page -->
 <section id="gameplayPage" class="page-content">
@@ -203,7 +263,6 @@
         <button class="btn-secondary" id="exportGameplayBtn">📥 Export Data</button>
     </div>
 
-    <!-- ⭐ UPDATED: Chart syncs with dropdown filter -->
     <div class="chart-card" style="margin-bottom: 30px;">
         <h3>🏆 Grade Distribution by Difficulty</h3>
         <p style="color: #94a3b8; font-size: 0.85rem; margin-bottom: 20px;">
@@ -409,7 +468,6 @@
                         <button class="modal-close" id="closeFeedbackModal">&times;</button>
                     </div>
                     <div class="modal-body" id="feedbackModalBody">
-                        <!-- Feedback details will be loaded here -->
                     </div>
                 </div>
             </div>
@@ -455,7 +513,6 @@
                         <button class="modal-close" id="closeCrashModal">&times;</button>
                     </div>
                     <div class="modal-body" id="crashModalBody">
-                        <!-- Crash details will be loaded here -->
                     </div>
                 </div>
             </div>
