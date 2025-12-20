@@ -1,17 +1,16 @@
-// USERS MANAGEMENT - AGE FILTER FULLY FIXED
-
+// USERS MANAGEMENT - TABLE VERSION (NO EMAIL)
 console.log("👥 Users.js loaded");
 
 let allUsers = [];
 let filteredUsers = [];
-let currentUserPage = 1;  // ⭐ RENAMED to avoid collision
-const userItemsPerPage = 20;  // ⭐ RENAMED
+let currentUserPage = 1;
+const userItemsPerPage = 20;
 
 async function loadUsers() {
     console.log("📥 Loading users...");
 
-    const usersGrid = document.getElementById('usersGrid');
-    usersGrid.innerHTML = '<p class="loading">Loading users...</p>';
+    const tableBody = document.getElementById('usersTableBody');
+    tableBody.innerHTML = '<tr><td colspan="6" class="loading">Loading users...</td></tr>';
 
     try {
         const snapshot = await window.db.collection('users').get();
@@ -35,163 +34,111 @@ async function loadUsers() {
             allUsers.push({
                 id: userId,
                 name: userData.displayName || userData.name || 'Unknown',
-                email: userData.email || 'No email',
                 age: userData.age || null,
                 gamesPlayed: gameplayCount,
                 quizzesTaken: quizCount,
                 feedbacksGiven: feedbackCount,
-                createdAt: userData.createdAt || null
+                totalActivity: gameplayCount + quizCount + feedbackCount
             });
         }
 
         console.log(`✅ Loaded ${allUsers.length} users`);
-        console.log("📊 Users with ages:", allUsers.filter(u => u.age).map(u => ({ name: u.name, age: u.age })));
+        
+        updateUserStats();
         
         filteredUsers = [...allUsers];
         currentUserPage = 1;
-        
-        // ⭐ CRITICAL: Create age filter BEFORE displaying users
-        createAgeFilterUI();
         displayUsers();
 
     } catch (error) {
         console.error("❌ Error loading users:", error);
-        usersGrid.innerHTML = '<p class="loading">Error loading users</p>';
+        tableBody.innerHTML = '<tr><td colspan="6" class="loading">Error loading users</td></tr>';
     }
 }
 
-// ⭐ BRAND NEW: Create age filter UI from scratch
-function createAgeFilterUI() {
-    console.log("🔧 Creating age filter UI...");
-    
-    // Find or create page-controls container
-    let pageControls = document.querySelector('#usersPage .page-controls');
-    
-    if (!pageControls) {
-        console.log("⚠️ page-controls not found, creating it...");
-        const usersPage = document.getElementById('usersPage');
-        if (!usersPage) {
-            console.error("❌ #usersPage not found!");
-            return;
-        }
-        
-        pageControls = document.createElement('div');
-        pageControls.className = 'page-controls';
-        pageControls.style.cssText = 'display: flex; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; align-items: center;';
-        
-        // Insert as first child of usersPage
-        usersPage.insertBefore(pageControls, usersPage.firstChild);
-        console.log("✅ Created page-controls container");
-    }
+function updateUserStats() {
+    const totalUsersEl = document.getElementById('totalUsersCount');
+    if (totalUsersEl) totalUsersEl.textContent = allUsers.length;
 
-    // Remove existing age filter
-    const existingFilter = document.getElementById('ageFilter');
-    if (existingFilter) {
-        existingFilter.remove();
-        console.log("🗑️ Removed old age filter");
-    }
+    const activePlayers = allUsers.filter(u => u.gamesPlayed > 0).length;
+    const activePlayersEl = document.getElementById('activePlayersCount');
+    if (activePlayersEl) activePlayersEl.textContent = activePlayers;
 
-    // Create wrapper div for label + select
-    const filterWrapper = document.createElement('div');
-    filterWrapper.style.cssText = 'display: flex; align-items: center; gap: 8px;';
+    const quizTakers = allUsers.filter(u => u.quizzesTaken > 0).length;
+    const quizTakersEl = document.getElementById('quizTakersCount');
+    if (quizTakersEl) quizTakersEl.textContent = quizTakers;
 
-    // Create label
-    const label = document.createElement('label');
-    label.textContent = 'Age:';
-    label.style.cssText = 'color: #94a3b8; font-weight: 500; font-size: 0.9rem;';
-
-    // Create select dropdown
-    const ageFilter = document.createElement('select');
-    ageFilter.id = 'ageFilter';
-    ageFilter.className = 'filter-select';
-    ageFilter.innerHTML = `
-        <option value="all">All Ages</option>
-        <option value="under18">Under 18</option>
-        <option value="18-19">18-19</option>
-        <option value="20-21">20-21</option>
-        <option value="22-25">22-25</option>
-        <option value="over25">Over 25</option>
-    `;
-
-    // Add change event listener
-    ageFilter.addEventListener('change', function() {
-        console.log("🔄 Age filter changed to:", this.value);
-        applyUserFilters();
-    });
-
-    // Assemble and add to page
-    filterWrapper.appendChild(label);
-    filterWrapper.appendChild(ageFilter);
-    
-    // Insert at beginning of page-controls (before search)
-    pageControls.insertBefore(filterWrapper, pageControls.firstChild);
-    
-    console.log("✅ Age filter UI created successfully!");
+    const feedbackContributors = allUsers.filter(u => u.feedbacksGiven > 0).length;
+    const feedbackContributorsEl = document.getElementById('feedbackContributorsCount');
+    if (feedbackContributorsEl) feedbackContributorsEl.textContent = feedbackContributors;
 }
 
 function displayUsers() {
-    const usersGrid = document.getElementById('usersGrid');
+    const tableBody = document.getElementById('usersTableBody');
 
     if (filteredUsers.length === 0) {
-        usersGrid.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-state-icon">👥</div>
-                <h3>No users found</h3>
-                <p>Try adjusting your filters</p>
-            </div>
-        `;
+        tableBody.innerHTML = '<tr><td colspan="6" class="loading">No users found</td></tr>';
         return;
     }
+
+    tableBody.innerHTML = '';
 
     const startIndex = (currentUserPage - 1) * userItemsPerPage;
     const endIndex = startIndex + userItemsPerPage;
     const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
 
-    usersGrid.innerHTML = '';
-
     paginatedUsers.forEach(user => {
-        const userCard = document.createElement('div');
-        userCard.className = 'user-card';
-        userCard.innerHTML = `
-            <div class="user-header">
-                <div class="user-avatar">${user.name.charAt(0).toUpperCase()}</div>
-                <div class="user-info">
-                    <h3>${user.name}</h3>
-                    ${user.age ? `<p style="font-size: 0.85rem; color: #64748b;">🎂 Age: ${user.age}</p>` : ''}
-                </div>
-            </div>
-            <div class="user-stats">
-                <div class="user-stat">
-                    <p>Games</p>
-                    <p>${user.gamesPlayed}</p>
-                </div>
-                <div class="user-stat">
-                    <p>Quizzes</p>
-                    <p>${user.quizzesTaken}</p>
-                </div>
-                <div class="user-stat">
-                    <p>Feedback</p>
-                    <p>${user.feedbacksGiven}</p>
-                </div>
-            </div>
-        `;
+        const row = document.createElement('tr');
+        
+        const totalActivity = user.gamesPlayed + user.quizzesTaken;
+        let activityBadge = 'badge-danger';
+        let activityText = 'Inactive';
+        
+        if (totalActivity >= 10) {
+            activityBadge = 'badge-success';
+            activityText = 'Active';
+        } else if (totalActivity >= 3) {
+            activityBadge = 'badge-warning';
+            activityText = 'Moderate';
+        } else if (totalActivity >= 1) {
+            activityBadge = 'badge-info';
+            activityText = 'New';
+        }
 
-        userCard.addEventListener('click', () => showUserDetails(user));
-        usersGrid.appendChild(userCard);
+        row.innerHTML = `
+            <td>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 40px; height: 40px; border-radius: 50%; background: var(--button-gradient); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1rem; flex-shrink: 0;">
+                        ${user.name.charAt(0).toUpperCase()}
+                    </div>
+                    <span style="font-weight: 600; color: var(--text-primary);">${user.name}</span>
+                </div>
+            </td>
+            <td>${user.age ? `<span style="color: var(--text-primary);">${user.age}</span>` : '<span style="color: #64748b;">N/A</span>'}</td>
+            <td><span class="badge badge-info">${user.gamesPlayed}</span></td>
+            <td><span class="badge badge-info">${user.quizzesTaken}</span></td>
+            <td><span class="badge badge-info">${user.feedbacksGiven}</span></td>
+            <td><span class="badge ${activityBadge}">${activityText}</span></td>
+            <td><button class="btn-view" onclick="showUserDetails('${user.id}')">View</button></td>
+        `;
+        tableBody.appendChild(row);
     });
 
     addUserPagination();
 }
 
 function addUserPagination() {
-    const usersGrid = document.getElementById('usersGrid');
+    const tableContainer = document.querySelector('#usersPage .table-container');
     const totalPages = Math.ceil(filteredUsers.length / userItemsPerPage);
+
+    const existingPagination = tableContainer.querySelector('.pagination-controls');
+    if (existingPagination) existingPagination.remove();
 
     if (totalPages <= 1) return;
 
     const paginationDiv = document.createElement('div');
     paginationDiv.className = 'pagination-controls';
-    paginationDiv.style.cssText = 'display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 30px; padding: 20px; grid-column: 1 / -1;';
+    paginationDiv.style.cssText = 'display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px; padding: 20px; flex-wrap: wrap;';
 
     const prevBtn = document.createElement('button');
     prevBtn.textContent = '← Prev';
@@ -200,7 +147,10 @@ function addUserPagination() {
     prevBtn.onclick = () => changeUserPage(currentUserPage - 1);
     paginationDiv.appendChild(prevBtn);
 
-    for (let i = 1; i <= totalPages; i++) {
+    const startPage = Math.max(1, currentUserPage - 2);
+    const endPage = Math.min(totalPages, startPage + 4);
+    
+    for (let i = startPage; i <= endPage; i++) {
         const pageBtn = document.createElement('button');
         pageBtn.textContent = i;
         pageBtn.className = currentUserPage === i ? 'btn-primary' : 'btn-secondary';
@@ -217,81 +167,152 @@ function addUserPagination() {
     paginationDiv.appendChild(nextBtn);
 
     const pageInfo = document.createElement('span');
-    pageInfo.style.cssText = 'margin-left: 20px; color: #94a3b8;';
+    pageInfo.style.cssText = 'margin-left: 20px; color: var(--text-secondary);';
     pageInfo.textContent = `Page ${currentUserPage} of ${totalPages} (${filteredUsers.length} users)`;
     paginationDiv.appendChild(pageInfo);
 
-    usersGrid.appendChild(paginationDiv);
+    tableContainer.appendChild(paginationDiv);
 }
 
 function changeUserPage(page) {
     currentUserPage = page;
     displayUsers();
-    document.getElementById('usersGrid').scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('usersTable').scrollIntoView({ behavior: 'smooth' });
 }
 
-// Search functionality
-const userSearch = document.getElementById('userSearch');
-if (userSearch) {
-    userSearch.addEventListener('input', applyUserFilters);
+function initializeFilters() {
+    const userSearch = document.getElementById('userSearch');
+    const ageFilter = document.getElementById('ageFilter');
+    const activityFilter = document.getElementById('activityFilter');
+
+    if (userSearch) userSearch.addEventListener('input', applyUserFilters);
+    if (ageFilter) ageFilter.addEventListener('change', applyUserFilters);
+    if (activityFilter) activityFilter.addEventListener('change', applyUserFilters);
 }
 
-// ⭐ FIXED: Apply filters function
 function applyUserFilters() {
-    const searchTerm = userSearch ? userSearch.value.toLowerCase() : '';
-    const ageFilterElement = document.getElementById('ageFilter');
-    const ageFilterValue = ageFilterElement ? ageFilterElement.value : 'all';
+    const userSearch = document.getElementById('userSearch');
+    const ageFilter = document.getElementById('ageFilter');
+    const activityFilter = document.getElementById('activityFilter');
 
-    console.log("🔍 APPLYING FILTERS - Search:", searchTerm, "| Age:", ageFilterValue);
+    const searchTerm = userSearch ? userSearch.value.toLowerCase() : '';
+    const ageFilterValue = ageFilter ? ageFilter.value : 'all';
+    const activityFilterValue = activityFilter ? activityFilter.value : 'all';
 
     filteredUsers = allUsers.filter(user => {
-        // Search filter
-        const matchesSearch = user.name.toLowerCase().includes(searchTerm) ||
-                             user.email.toLowerCase().includes(searchTerm);
+        const matchesSearch = user.name.toLowerCase().includes(searchTerm);
 
-        // Age filter
         let matchesAge = true;
         if (ageFilterValue !== 'all') {
-            if (!user.age || user.age === null) {
+            if (!user.age) {
                 matchesAge = false;
             } else {
                 const age = parseInt(user.age);
-                
                 switch(ageFilterValue) {
-                    case 'under18': 
-                        matchesAge = age < 18;
-                        break;
-                    case '18-19': 
-                        matchesAge = age >= 18 && age <= 19;
-                        break;
-                    case '20-21': 
-                        matchesAge = age >= 20 && age <= 21;
-                        break;
-                    case '20-21': 
-                        matchesAge = age >= 20 && age <= 21;
-                        break;
-                    case '22-25': 
-                        matchesAge = age >= 22 && age <= 25;
-                        break;
-                    case 'over25': 
-                        matchesAge = age > 25;
-                        break;
+                    case 'under18': matchesAge = age < 18; break;
+                    case '18-19': matchesAge = age >= 18 && age <= 19; break;
+                    case '20-21': matchesAge = age >= 20 && age <= 21; break;
+                    case '22-25': matchesAge = age >= 22 && age <= 25; break;
+                    case 'over25': matchesAge = age > 25; break;
                 }
-                
-                console.log(`  👤 ${user.name} (age ${age}): ${matchesAge ? '✅ MATCH' : '❌ NO MATCH'}`);
             }
         }
 
-        return matchesSearch && matchesAge;
+        let matchesActivity = true;
+        if (activityFilterValue !== 'all') {
+            const totalActivity = user.gamesPlayed + user.quizzesTaken;
+            switch(activityFilterValue) {
+                case 'active': matchesActivity = totalActivity >= 10; break;
+                case 'moderate': matchesActivity = totalActivity >= 3 && totalActivity < 10; break;
+                case 'new': matchesActivity = totalActivity >= 1 && totalActivity < 3; break;
+                case 'inactive': matchesActivity = totalActivity === 0; break;
+            }
+        }
+
+        return matchesSearch && matchesAge && matchesActivity;
     });
 
-    console.log(`✅ Filter result: ${filteredUsers.length} users`);
     currentUserPage = 1;
     displayUsers();
 }
 
-function showUserDetails(user) {
-    alert(`User Details:\nName: ${user.name}\nEmail: ${user.email}\nAge: ${user.age || 'N/A'}\nGames: ${user.gamesPlayed}\nQuizzes: ${user.quizzesTaken}\nFeedback: ${user.feedbacksGiven}`);
+function showUserDetails(userId) {
+    const user = allUsers.find(u => u.id === userId);
+    if (!user) return;
+
+    const modal = document.getElementById('userModal');
+    const modalBody = document.getElementById('userModalBody');
+    const modalTitle = document.getElementById('modalUserName');
+    
+    modalTitle.textContent = user.name;
+
+    const totalActivity = user.gamesPlayed + user.quizzesTaken;
+    let activityLevel = 'Inactive';
+    let activityColor = '#ef4444';
+    
+    if (totalActivity >= 10) { activityLevel = 'Active'; activityColor = '#10b981'; }
+    else if (totalActivity >= 3) { activityLevel = 'Moderate'; activityColor = '#f59e0b'; }
+    else if (totalActivity >= 1) { activityLevel = 'New'; activityColor = '#3b82f6'; }
+
+    modalBody.innerHTML = `
+        <div class="detail-row">
+            <span class="detail-label">User ID:</span>
+            <span class="detail-value" style="font-size: 0.75rem; word-break: break-all; font-family: monospace;">${user.id}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Display Name:</span>
+            <span class="detail-value">${user.name}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Age:</span>
+            <span class="detail-value">${user.age || 'Not provided'}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-label">Activity Level:</span>
+            <span class="detail-value" style="color: ${activityColor}; font-weight: 700;">${activityLevel}</span>
+        </div>
+        
+        <h3 style="margin-top: 25px; margin-bottom: 15px; color: var(--text-secondary);">📊 Activity Statistics</h3>
+        
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+            <div style="background: var(--darker-bg); padding: 20px; border-radius: 12px; text-align: center; border: 1px solid var(--border-color);">
+                <div style="font-size: 2rem; margin-bottom: 5px;">🎮</div>
+                <div style="font-size: 1.8rem; font-weight: 700; color: var(--primary-color);">${user.gamesPlayed}</div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary);">Games Played</div>
+            </div>
+            <div style="background: var(--darker-bg); padding: 20px; border-radius: 12px; text-align: center; border: 1px solid var(--border-color);">
+                <div style="font-size: 2rem; margin-bottom: 5px;">📝</div>
+                <div style="font-size: 1.8rem; font-weight: 700; color: var(--primary-color);">${user.quizzesTaken}</div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary);">Quizzes Taken</div>
+            </div>
+            <div style="background: var(--darker-bg); padding: 20px; border-radius: 12px; text-align: center; border: 1px solid var(--border-color);">
+                <div style="font-size: 2rem; margin-bottom: 5px;">💬</div>
+                <div style="font-size: 1.8rem; font-weight: 700; color: var(--primary-color);">${user.feedbacksGiven}</div>
+                <div style="font-size: 0.85rem; color: var(--text-secondary);">Feedback Given</div>
+            </div>
+        </div>
+
+        <div class="detail-row" style="background: var(--darker-bg); padding: 15px; border-radius: 10px; margin-top: 15px;">
+            <span class="detail-label">Total Interactions:</span>
+            <span class="detail-value" style="font-size: 1.2rem; font-weight: 700; color: var(--primary-color);">${user.gamesPlayed + user.quizzesTaken + user.feedbacksGiven}</span>
+        </div>
+    `;
+
+    modal.classList.add('active');
+}
+
+const closeUserModal = document.getElementById('closeUserModal');
+if (closeUserModal) {
+    closeUserModal.addEventListener('click', () => {
+        document.getElementById('userModal').classList.remove('active');
+    });
+}
+
+const userModal = document.getElementById('userModal');
+if (userModal) {
+    userModal.addEventListener('click', function(e) {
+        if (e.target === this) this.classList.remove('active');
+    });
 }
 
 const exportUsersBtn = document.getElementById('exportUsersBtn');
@@ -303,13 +324,19 @@ if (exportUsersBtn) {
 }
 
 function convertUsersToCSV(users) {
-    const headers = ['Name', 'Email', 'Age', 'Games Played', 'Quizzes Taken', 'Feedback Given'];
-    const rows = users.map(u => [u.name, u.email, u.age || 'N/A', u.gamesPlayed, u.quizzesTaken, u.feedbacksGiven]);
+    const headers = ['Name', 'Age', 'Games Played', 'Quizzes Taken', 'Feedback Given', 'Total Activity', 'Status'];
+    const rows = users.map(u => {
+        const totalActivity = u.gamesPlayed + u.quizzesTaken;
+        let status = 'Inactive';
+        if (totalActivity >= 10) status = 'Active';
+        else if (totalActivity >= 3) status = 'Moderate';
+        else if (totalActivity >= 1) status = 'New';
+        
+        return [u.name, u.age || 'N/A', u.gamesPlayed, u.quizzesTaken, u.feedbacksGiven, u.gamesPlayed + u.quizzesTaken + u.feedbacksGiven, status];
+    });
     
     let csv = headers.join(',') + '\n';
-    rows.forEach(row => {
-        csv += row.join(',') + '\n';
-    });
+    rows.forEach(row => { csv += row.map(field => `"${field}"`).join(',') + '\n'; });
     return csv;
 }
 
@@ -322,5 +349,8 @@ function downloadCSV(csv, filename) {
     a.click();
     window.URL.revokeObjectURL(url);
 }
+
+document.addEventListener('DOMContentLoaded', initializeFilters);
+window.showUserDetails = showUserDetails;
 
 console.log("✅ Users.js ready");
