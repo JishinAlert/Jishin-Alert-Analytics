@@ -1,5 +1,12 @@
 console.log("🎮 Gameplay.js loaded");
 
+// ✅ Register ChartDataLabels plugin
+if (typeof ChartDataLabels !== 'undefined') {
+    Chart.register(ChartDataLabels);
+    console.log("✅ ChartDataLabels registered in gameplay.js!");
+}
+
+
 let allGameplay = [];
 let filteredGameplay = [];
 let currentGameplayPage = 1;
@@ -145,6 +152,31 @@ function updateGameplayGradeChart(difficulty) {
                         }
                     }
                 }
+,
+                datalabels: {
+                    anchor: 'end',
+                    align: 'center',
+                    color: '#ffffff',
+                    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                    borderRadius: 4,
+                    padding: {
+                        top: 4,
+                        bottom: 4,
+                        left: 8,
+                        right: 8
+                    },
+                    font: {
+                        weight: 'bold',
+                        size: 14,
+                        family: 'Arial'
+                    },
+                    formatter: function(value, context) {
+                        return value > 0 ? value : '';
+                    },
+                    display: function(context) {
+                        return context.dataset.data[context.dataIndex] > 0;
+                    }
+                }
             },
             scales: {
                 y: {
@@ -181,7 +213,7 @@ function updateGameplayGradeChart(difficulty) {
         gradeDiv.innerHTML = `
             <div style="font-size: 1.5rem; font-weight: 700; color: ${colors[index]};">${gradePercentages[grade]}%</div>
             <div style="color: #94a3b8; font-size: 0.85rem; margin-top: 5px;">Grade ${grade}</div>
-            <div style="color: #64748b; font-size: 0.95rem; margin-top: 8px;">${gradeCounts[grade]} games</div>
+            <div style="color: #64748b; font-size: 0.75rem;">${gradeCounts[grade]} games</div>
         `;
         labelsDiv.appendChild(gradeDiv);
     });
@@ -372,4 +404,4 @@ function downloadCSV(csv, filename) {
     window.URL.revokeObjectURL(url);
 }
 
-console.log("✅ Gameplay.js ready");
+console.log("✅ Gameplay.js ready");    
