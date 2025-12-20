@@ -1,5 +1,3 @@
-// GAMEPLAY HISTORY - SYNCHRONIZED FILTERS
-
 console.log("🎮 Gameplay.js loaded");
 
 let allGameplay = [];
@@ -49,8 +47,7 @@ async function loadGameplayHistory() {
         console.log(`✅ Loaded ${allGameplay.length} gameplay records`);
         filteredGameplay = [...allGameplay];
         currentGameplayPage = 1;
-        
-        // ⭐ Initial chart for all difficulties
+
         updateGameplayGradeChart('all');
         
         displayGameplayHistory(filteredGameplay);
@@ -61,14 +58,12 @@ async function loadGameplayHistory() {
     }
 }
 
-// ⭐ UPDATED: Grade chart with proper "all" mode handling
 function updateGameplayGradeChart(difficulty) {
     console.log("📊 Creating gameplay grade chart for:", difficulty);
 
-    // ⭐ FIX: Properly filter games
     let filteredGames;
     if (difficulty === 'all') {
-        filteredGames = [...allGameplay]; // Use all games
+        filteredGames = [...allGameplay];
     } else {
         filteredGames = allGameplay.filter(g => g.difficulty === difficulty);
     }
@@ -186,7 +181,7 @@ function updateGameplayGradeChart(difficulty) {
         gradeDiv.innerHTML = `
             <div style="font-size: 1.5rem; font-weight: 700; color: ${colors[index]};">${gradePercentages[grade]}%</div>
             <div style="color: #94a3b8; font-size: 0.85rem; margin-top: 5px;">Grade ${grade}</div>
-            <div style="color: #64748b; font-size: 0.75rem;">${gradeCounts[grade]} games</div>
+            <div style="color: #64748b; font-size: 0.75rem; margin-top: 12px;">${gradeCounts[grade]} games</div>
         `;
         labelsDiv.appendChild(gradeDiv);
     });
