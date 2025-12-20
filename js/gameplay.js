@@ -181,7 +181,7 @@ function updateGameplayGradeChart(difficulty) {
         gradeDiv.innerHTML = `
             <div style="font-size: 1.5rem; font-weight: 700; color: ${colors[index]};">${gradePercentages[grade]}%</div>
             <div style="color: #94a3b8; font-size: 0.85rem; margin-top: 5px;">Grade ${grade}</div>
-            <div style="color: #64748b; font-size: 0.75rem; margin-top: 20px;">${gradeCounts[grade]} games</div>
+            <div style="color: #64748b; font-size: 0.95rem; margin-top: 8px;">${gradeCounts[grade]} games</div>
         `;
         labelsDiv.appendChild(gradeDiv);
     });
