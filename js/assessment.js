@@ -2,6 +2,14 @@
 
 console.log("📝 Assessment.js loaded");
 
+// ✅ CRITICAL: Register ChartDataLabels plugin globally for Chart.js v4
+if (typeof ChartDataLabels !== 'undefined') {
+    Chart.register(ChartDataLabels);
+    console.log("✅ ChartDataLabels plugin registered!");
+} else {
+    console.warn("⚠️ ChartDataLabels plugin not found - percentages won't show on charts");
+}
+
 let allAssessmentQuizzes = [];
 let currentAssessmentDifficulty = 'Easy';
 let currentAssessmentPage = 1;
@@ -177,6 +185,34 @@ function updateGradeChart(difficulty) {
                             return `${label}: ${value} (${percentage}%)`;
                         }
                     }
+                },
+                datalabels: {
+                    color: '#ffffff',
+                    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+                    borderRadius: 4,
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.8)',
+                    padding: {
+                        top: 4,
+                        bottom: 4,
+                        left: 8,
+                        right: 8
+                    },
+                    font: {
+                        weight: 'bold',
+                        size: 14,
+                        family: 'Arial'
+                    },
+                    formatter: function(value, context) {
+                        const percentage = gradePercentages[['A', 'B', 'C', 'D', 'F'][context.dataIndex]];
+                        return percentage > 0 ? percentage + '%' : '';
+                    },
+                    display: function(context) {
+                        return context.dataset.data[context.dataIndex] > 0;
+                    },
+                    textAlign: 'center',
+                    anchor: 'center',
+                    align: 'center'
                 }
             }
         }
@@ -222,8 +258,7 @@ function updateQuestionAnalysis(difficulty) {
         </div>
     `;
 
-    // ✅ FIX: Get questions from the NEWEST quiz (first in the sorted array)
-    const newestQuiz = filteredQuizzes[0]; // Quizzes are already sorted by timestamp (newest first)
+    const newestQuiz = filteredQuizzes[0];
     const currentQuestionTexts = newestQuiz.questionTexts || [];
 
     const questionStats = [];
@@ -231,7 +266,6 @@ function updateQuestionAnalysis(difficulty) {
         let correct = 0;
         let total = 0;
         
-        // ✅ Use question from the newest quiz
         let questionText = "Question not available";
         if (currentQuestionTexts[i]) {
             questionText = currentQuestionTexts[i];
