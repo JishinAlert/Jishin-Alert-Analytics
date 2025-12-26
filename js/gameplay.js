@@ -202,7 +202,7 @@ function updateGameplayGradeChart(difficulty) {
 
     const labelsDiv = document.createElement('div');
     labelsDiv.className = 'grade-percentages';
-    labelsDiv.style.cssText = 'display: flex; justify-content: space-around; margin-top: 20px; padding: 15px; background: #020617; border-radius: 8px;';
+    labelsDiv.style.cssText = 'display: flex; justify-content: space-around; margin-top: 20px; padding: 15px 15px 25px 15px; background: #1e293b; border-radius: 8px;';
     
     const grades = ['A', 'B', 'C', 'D', 'F'];
     const colors = ['#10b981', '#3b82f6', '#f59e0b', '#f97316', '#ef4444'];
@@ -213,7 +213,7 @@ function updateGameplayGradeChart(difficulty) {
         gradeDiv.innerHTML = `
             <div style="font-size: 1.5rem; font-weight: 700; color: ${colors[index]};">${gradePercentages[grade]}%</div>
             <div style="color: #94a3b8; font-size: 0.85rem; margin-top: 5px;">Grade ${grade}</div>
-            <div style="color: #64748b; font-size: 0.75rem;">${gradeCounts[grade]} games</div>
+            <div style="color: #64748b; font-size: 0.75rem; margin-top: 12px;">${gradeCounts[grade]} games</div>
         `;
         labelsDiv.appendChild(gradeDiv);
     });
@@ -404,4 +404,4 @@ function downloadCSV(csv, filename) {
     window.URL.revokeObjectURL(url);
 }
 
-console.log("✅ Gameplay.js ready");    
+console.log("✅ Gameplay.js ready");
